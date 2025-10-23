@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Freely with No Boundaries · Map</title>
+  <meta name="description" content="My MAP:" />
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    #map {
+      height: 600px;
+      width: 100%;
+      border: 2px solid gray;
+      margin: 20px 0;
+    }
+    body { margin: 0; padding: 0; background-color: #c5e1a5;}
+  </style>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <h1 class="logo"><a href="Main.html" aria-label="Home">No Boundaries Canada</a></h1>
+    <nav aria-label="Primary">
+      <ul class="nav">
+        <li><a href="Main.html">Home</a></li>
+        <li><a class="active" href="map.html">Map</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1>Canada Public Places</h1>
+  <p>Zoom, click, explore any public / no permit required place. Open with a local server for best results.</p>
+  <div id="map"></div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2025 Sydney's MVP site for GEOG 464.</p>
+  </div>
+</footer>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // Initialize the map
+  var map = L.map('map').setView([62.0, -105.0], 4);
+
+  // Base map tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Custom icons
+//var redIcon = L.icon({
+//  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+//  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+//  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
+//});
+//
+//var greenIcon = L.icon({
+//  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+//  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+//  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
+//});
+//
+//var blueIcon = L.icon({
+//  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+//  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+//  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
+//});
+//
+//// Markers
+//L.marker([45.4236, -75.7009], {icon: redIcon}).addTo(map).bindPopup('Parliament Hill: Canadian government center');
+//L.marker([45.4293, -75.6900], {icon: greenIcon}).addTo(map).bindPopup('ByWard Market: Local shopping and culture');
+//L.marker([45.4215, -75.6972], {icon: blueIcon}).addTo(map).bindPopup('Downtown Ottawa: Business district');
+//
+//// Circles
+//L.circle([45.4215, -75.6972], {
+//  radius: 4000,
+//  color: 'blue',
+//  fillColor: 'lightblue',
+//  fillOpacity: 0.4
+//}).addTo(map).bindTooltip('4km radius around downtown');
+//
+//L.circle([45.4293, -75.6900], {
+//  radius: 2000,
+//  color: 'green',
+//  fillColor: 'lightgreen',
+//  fillOpacity: 0.4
+//}).addTo(map).bindTooltip('2km radius around ByWard Market');
+//
+  // ====== Load Local GeoJSON (Saskatchewan Parks) ======
+  fetch('data/Saskatchewan_Parks_Reprojected.geojson')
+    .then(response => response.json())
+    .then(data => {
+      L.geoJSON(data, {
+        style: { color: 'green', weight: 2, fillOpacity: 0.3 },
+        onEachFeature: function (feature, layer) {
+          if (feature.properties && feature.properties.name) {
+            layer.bindTooltip(feature.properties.name);
+          }
+        }
+      }).addTo(map);
+    })
+    .catch(error => console.error('Local GeoJSON load error:', error));
+
+  // ====== Load External GeoJSON (Google Apps Script) ======
+  const externalGeojsonUrl = 'https://script.google.com/macros/s/AKfycbxB6yDEi1_qOrcDGNRflhWbxOB37CDTmWt2U6l0cKfUODBxSThOzNJ5j801mjcBDEgA/exec';
+
+  fetch(externalGeojsonUrl)
+    .then(res => res.json())
+    .then(data => {
+      const externalLayer = L.geoJSON(data, {
+        onEachFeature: function (feature, layer) {
+          if (feature.properties && feature.properties.name) {
+            layer.bindPopup(feature.properties.name);
+          }
+        }
+      }).addTo(map);
+
+      // Optional: zoom to bounds of external data
+      map.fitBounds(externalLayer.getBounds());
+    })
+    .catch(error => {
+      console.error('External GeoJSON load error:', error);
+    });
+
+  // Click popup
+  map.on('click', function(e) {
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent('You clicked here! Coordinates: ' + e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4))
+      .openOn(map);
+  });
+</script>
+
+</body>
+</html>

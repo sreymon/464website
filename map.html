@@ -1,0 +1,112 @@
+import os
+
+html_content = '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Map of Parks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha512-u1Pz0pLZlP5t5JHGpkvB5Uv6I+EufxOQFME9h0xW/Ap4jHbRb+0mMbI+BlhldCvO8I6ty3zDoZ8ovGHw2iYDLw=="
+    crossorigin=""
+  />
+
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #map { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin=""
+></script>
+
+<script>
+  // Initialize map centered in Canada
+  const map = L.map('map').setView([56.0, -100.0], 4);
+
+  // Base tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // List of GeoJSON sources (use the files your Python script outputs)
+  const geojsonSources = [
+    {
+      name: 'Saskatchewan Parks Reprojected',
+      url: 'https://script.google.com/macros/s/AKfycbwIRbNATUvZElF8vZCxttOpreOJYHz0D7kTpUVqaZkv8w7_oCb4KMIoF2YcPz--44VN/exec',
+      style: { color: 'purple', weight: 2, fillOpacity: 0.3 }
+    },
+    {
+      name: 'Manitoba Parks Reprojected',
+      url: 'https://script.google.com/macros/s/AKfycbxdEz4jCBgBhei09k7NC60t0AGsqvZSnzViAQMIJCy1Zxqimjw2fhE7ACjACR05qMBR/exec',
+      style: { color: 'green', weight: 2, fillOpacity: 0.3 }
+    }
+    // Add more if you have them
+  ];
+
+  const overlayLayers = {};
+
+  geojsonSources.forEach((source, i) => {
+    fetch(source.url)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error when loading ${source.name}: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        const layer = L.geoJSON(data, {
+          style: source.style,
+          onEachFeature: (feature, layer) => {
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup(feature.properties.name);
+            }
+          }
+        }).addTo(map);
+
+        overlayLayers[source.name] = layer;
+
+        // Zoom to the first layer loaded
+        if (i === 0) {
+          map.fitBounds(layer.getBounds());
+        }
+      })
+      .catch(err => {
+        console.error(`Error loading ${source.name}`, err);
+      });
+  });
+
+  // Add control to toggle layers
+  L.control.layers(null, overlayLayers, { collapsed: false }).addTo(map);
+
+  // Popup on click
+  map.on('click', function(e) {
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`You clicked: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`)
+      .openOn(map);
+  });
+</script>
+
+</body>
+</html>'''
+
+# Change this path to your desired output location
+output_path = os.path.expanduser("~/Downloads/EVERYTHING/GEOG464/geog464-mvp-starter/html/index.html")
+
+with open(output_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(f"HTML file saved to: {output_path}")
