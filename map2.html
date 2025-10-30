@@ -28,7 +28,7 @@
     <nav aria-label="Primary">
       <ul class="nav">
         <li><a href="Main.html">Home</a></li>
-        <li><a class="active" href="map.html">Map</a></li>
+        <li><a class="active" href="map2.html">Map</a></li>
         <li><a href="about.html">About</a></li>
       </ul>
     </nav>
@@ -52,12 +52,12 @@
 
 <script>
   // Initialize the map
-  var map = L.map('map').setView([62.0, -105.0], 4);
+  var map2 = L.map2('map2').setView([62.0, -105.0], 4);
 
   // Base map tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+  }).addTo(map2);
 
   // Custom icons
 //var redIcon = L.icon({
@@ -99,7 +99,7 @@
 //}).addTo(map).bindTooltip('2km radius around ByWard Market');
 //
   // ====== Load Local GeoJSON (Saskatchewan Parks) ======
-  fetch('Saskatchewan_Parks_Reprojected.geojson')
+  fetch('https://sreymon.github.io/464website/')
     .then(response => response.json())
     .then(data => {
       L.geoJSON(data, {
@@ -109,7 +109,7 @@
             layer.bindTooltip(feature.properties.name);
           }
         }
-      }).addTo(map);
+      }).addTo(map2);
     })
     .catch(error => console.error('Local GeoJSON load error:', error));
 
@@ -125,17 +125,17 @@
             layer.bindPopup(feature.properties.name);
           }
         }
-      }).addTo(map);
+      }).addTo(map2);
 
       // Optional: zoom to bounds of external data
-      map.fitBounds(externalLayer.getBounds());
+      map2.fitBounds(externalLayer.getBounds());
     })
     .catch(error => {
       console.error('External GeoJSON load error:', error);
     });
 
   // Click popup
-  map.on('click', function(e) {
+  map2.on('click', function(e) {
     L.popup()
       .setLatLng(e.latlng)
       .setContent('You clicked here! Coordinates: ' + e.latlng.lat.toFixed(4) + ', ' + e.latlng.lng.toFixed(4))
