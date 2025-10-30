@@ -99,7 +99,7 @@
 //}).addTo(map).bindTooltip('2km radius around ByWard Market');
 //
   // ====== Load Local GeoJSON (Saskatchewan Parks) ======
-  fetch('data/Saskatchewan_Parks_Reprojected.geojson')
+  fetch('Saskatchewan_Parks_Reprojected.geojson')
     .then(response => response.json())
     .then(data => {
       L.geoJSON(data, {
@@ -114,7 +114,7 @@
     .catch(error => console.error('Local GeoJSON load error:', error));
 
   // ====== Load External GeoJSON (Google Apps Script) ======
-  const externalGeojsonUrl = 'https://script.google.com/macros/s/AKfycbxB6yDEi1_qOrcDGNRflhWbxOB37CDTmWt2U6l0cKfUODBxSThOzNJ5j801mjcBDEgA/exec';
+  //const externalGeojsonUrl = 'https://script.google.com/macros/s/AKfycbxB6yDEi1_qOrcDGNRflhWbxOB37CDTmWt2U6l0cKfUODBxSThOzNJ5j801mjcBDEgA/exec';
 
   fetch(externalGeojsonUrl)
     .then(res => res.json())
